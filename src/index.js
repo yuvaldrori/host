@@ -5,13 +5,15 @@ var freq = [];
 //array of kid with name and gender
 var kids = [];
 //how many kids in a group
-var nKidsInGroup = 0;
+var kidsInGroup = 0;
 //true - group shuffling, false - change hosts in single group
 var shuffle = true;
 //results written here
 var results = [];
 //events
 var events = 0;
+var groups = 0;
+var mod = 0;
 
 var genRandomSex = function () {
   if (Math.random() > 0.5) {
@@ -21,12 +23,12 @@ var genRandomSex = function () {
   }
 };
 
-var initTestGroup = function () {
+var initTestGroup = function (n) {
   while (kids.length) {
     kids.pop();
   }
-  for (var i = 0; i < 35; i += 1) {
-    kids.push({name: i, sex: genRandomSex()});
+  for (var i = 0; i < n; i += 1) {
+    kids.push({id: i, name: i, sex: genRandomSex()});
   }
 };
 
@@ -45,7 +47,7 @@ var girls = function () {
     } else {
       return p;
     }
-  }, 0)
+  }, 0);
 };
 
 var boys = function () {
@@ -62,15 +64,26 @@ var initFreqArray = function () {
   }
 };
 
-var initResults = function () {
+var initResultsWithHosts = function () {
   while (results.length) {
     results.pop();
   }
-  var groups = Math.floor(kids.length / nKidsInGroup);
-  for (var i = 0; i < events; i += 0) {
+  var index = 0;
+  groups = Math.floor(kids.length / kidsInGroup);
+  for (var i = 0; i < events; i += 1) {
     results.push([]);
     for (var j = 0; j < groups; j += 1) {
-      results[i].push([]);
+      results[i].push([kids[index]]);
+      index += 1;
+      if (index === kids.length) {
+        index = 0;
+      }
     }
+  }
+};
+
+var updateFreq = function (kidIndex, groupIdx) {
+  for (var i = 0; i < results[groupIdx].length; i += 1) {
+    freq[kidIndex][results[groupIdx][i].id] += 1;
   }
 };
