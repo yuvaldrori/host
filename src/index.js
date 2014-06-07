@@ -71,7 +71,11 @@ function Freq (n) {
     var a = [];
     a = kids instanceof Array ? kids : a.push(kids);
     for (var i = 0; i < a.length; i += 1) {
-      score += this.a[kida][a[i]] + this.a[a[i]][kida];
+      if (kida === kids[i]) {
+        score = Number.MAX_VALUE;
+      } else {
+        score += this.a[kida][a[i]] + this.a[a[i]][kida];
+      }
     }
     return score;
   };
@@ -99,5 +103,31 @@ function Event () {
   };
 }
 
-var kids = new Kids();
-var freq = new Freq(kids.total);
+function Results (weeks, groupSize) {
+  var a = [];
+  var s = [];
+  var kids = new Kids();
+  var freq = new Freq(kids.total);
+  var groups = Math.floor(kids.total / groupSize);
+  var events = groups * weeks;
+  var i, g, k, m, t;
+  //init results with hosts
+  for (i = 0; i < events; i += 1) {
+    a.push(new Event());
+    a[i].update(kids[i < kids.total ? i : i - kids.total]);
+  }
+  //
+  for (i = 0; i < weeks; i += 1){
+    for (k = 0; k < kids.total; k += 1) {
+      s = [];
+      for (g = 0 + i * g; g < (groups + i * g); g += 1) {
+        s.push(a[g].score(kids[k], freq));
+      }
+      t = 0;
+      for (m = 0; m < s.length; m += 1) {
+        t = t < s[m] ? t : m;
+      }
+      a[i * g + t].update(kids[k]);
+    }
+  }
+}
