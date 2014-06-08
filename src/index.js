@@ -95,11 +95,11 @@ function Event () {
     this.a.push(kid);
     this.total = this.a.length;
     this.girls = countGirls(this.a);
-    this.boys = this.total = this.girls;
-    this.ration = ratio (this.girls, this.total);
+    this.boys = this.total - this.girls;
+    this.ratio = ratio (this.girls, this.total);
   };
   this.score = function (kid, freq) {
-    return freq.getFreq (kid, freq);
+    return freq.getFreq (kid, this.a);
   };
 }
 
@@ -114,20 +114,20 @@ function Results (weeks, groupSize) {
   //init results with hosts
   for (i = 0; i < events; i += 1) {
     a.push(new Event());
-    a[i].update(kids[i < kids.total ? i : i - kids.total]);
+    a[i].update(kids.a[i < kids.total ? i : i - kids.total]);
   }
   //
   for (i = 0; i < weeks; i += 1){
     for (k = 0; k < kids.total; k += 1) {
       s = [];
-      for (g = 0 + i * g; g < (groups + i * g); g += 1) {
-        s.push(a[g].score(kids[k], freq));
+      for (g = 0 + i * groups; g < (groups + i * groups); g += 1) {
+        s.push(a[g].score(kids.a[k], freq));
       }
       t = 0;
       for (m = 0; m < s.length; m += 1) {
         t = t < s[m] ? t : m;
       }
-      a[i * g + t].update(kids[k]);
+      a[i * g + t].update(kids.a[k]);
     }
   }
 }
