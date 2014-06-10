@@ -63,19 +63,19 @@ function Freq (n) {
 
   this.a = init(n);
 
-  this.update = function (kida, kidb) {
-    this.a[kida][kidb] += 1;
+  this.update = function (kida, kids) {
+    var a = [];
+    a = kids instanceof Array ? kids : a.push(kids);
+    for (var i = 0; i < a.length; i += 1) {
+      this.a[kida.id][kids[i].id] += 1;
+    }
   };
   this.getFreq = function (kida, kids) {
     var score = 0;
     var a = [];
     a = kids instanceof Array ? kids : a.push(kids);
     for (var i = 0; i < a.length; i += 1) {
-      if (kida === kids[i]) {
-        score = Number.MAX_VALUE;
-      } else {
-        score += this.a[kida][a[i]] + this.a[a[i]][kida];
-      }
+      score += this.a[kida.id][a[i].id] + this.a[a[i].id][kida.id];
     }
     return score;
   };
@@ -91,14 +91,20 @@ function Event () {
   this.boys = 0;
   this.ratio = 0;
 
-  this.update = function (kid) {
+  this.update = function (kid, freq) {
     this.a.push(kid);
+    freq.update(kid, this.a);
     this.total = this.a.length;
     this.girls = countGirls(this.a);
     this.boys = this.total - this.girls;
     this.ratio = ratio (this.girls, this.total);
   };
   this.score = function (kid, freq) {
+    for (var i = 0; i < this.a.length; i += 1) {
+      if (kid === this.a[i]) {
+        return Number.MAX_VALUE;
+      }
+    }
     return freq.getFreq (kid, this.a);
   };
 }
@@ -127,7 +133,8 @@ function Results (weeks, groupSize) {
       for (m = 0; m < s.length; m += 1) {
         t = t < s[m] ? t : m;
       }
-      a[i * g + t].update(kids.a[k]);
+      a[i * groups + t].update(kids.a[k]);
     }
   }
+  return a;
 }
