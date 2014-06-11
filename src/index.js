@@ -84,12 +84,13 @@ function Freq (n) {
   };
 }
 
-function Event () {
+function Event (size) {
   this.a = [];
   this.total = 0;
   this.girls = 0;
   this.boys = 0;
   this.ratio = 0;
+  this.size = size;
 
   this.update = function (kid, freq) {
     this.a.push(kid);
@@ -100,12 +101,15 @@ function Event () {
     this.ratio = ratio (this.girls, this.total);
   };
   this.score = function (kid, freq) {
+    var score = 0;
     for (var i = 0; i < this.a.length; i += 1) {
       if (kid === this.a[i]) {
         return Number.MAX_VALUE;
       }
     }
-    return freq.getFreq (kid, this.a);
+    score += freq.getFreq (kid, this.a);
+    score += (this.total + 1) > this.size ? 100 : 0;
+    return score;
   };
 }
 
@@ -119,8 +123,8 @@ function Results (weeks, groupSize) {
   var i, g, k, m, t;
   //init results with hosts
   for (i = 0; i < events; i += 1) {
-    a.push(new Event());
-    a[i].update(kids.a[i < kids.total ? i : i - kids.total]);
+    a.push(new Event(groupSize));
+    a[i].update(kids.a[i < kids.total ? i : i - kids.total], freq);
   }
   //
   for (i = 0; i < weeks; i += 1){
@@ -133,7 +137,7 @@ function Results (weeks, groupSize) {
       for (m = 0; m < s.length; m += 1) {
         t = t < s[m] ? t : m;
       }
-      a[i * groups + t].update(kids.a[k]);
+      a[i * groups + t].update(kids.a[k], freq);
     }
   }
   return a;
