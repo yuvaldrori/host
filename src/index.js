@@ -100,7 +100,7 @@ function Event (size) {
     this.boys = this.total - this.girls;
     this.ratio = ratio (this.girls, this.total);
   };
-  this.score = function (kid, freq) {
+  this.score = function (kid, week, freq) {
     var score = 0;
     for (var i = 0; i < this.a.length; i += 1) {
       if (kid === this.a[i]) {
@@ -108,7 +108,9 @@ function Event (size) {
       }
     }
     score += freq.getFreq (kid, this.a);
-    score += (this.total + 1) > this.size ? 100 : 0;
+    if ((this.total + 1) > this.size) {
+      score += (this.size - 1) * week;
+    }
     return score;
   };
 }
@@ -120,7 +122,9 @@ function Results (weeks, groupSize) {
   var freq = new Freq(kids.total);
   var groups = Math.floor(kids.total / groupSize);
   var events = groups * weeks;
-  var i, g, k, m, t;
+  var i, g, k;
+  var lv, idx;
+  var score = 0;
   //init results with hosts
   for (i = 0; i < events; i += 1) {
     a.push(new Event(groupSize));
@@ -128,16 +132,22 @@ function Results (weeks, groupSize) {
   }
   //
   for (i = 0; i < weeks; i += 1){
+    assignkid:
     for (k = 0; k < kids.total; k += 1) {
       s = [];
       for (g = 0 + i * groups; g < (groups + i * groups); g += 1) {
-        s.push(a[g].score(kids.a[k], freq));
+        score = a[g].score(kids.a[k], i + 1, freq);
+        if (score == Number.MAX_VALUE) {
+          continue assignkid;
+        } else {
+          s.push(score);
+        }
       }
-      t = 0;
-      for (m = 0; m < s.length; m += 1) {
-        t = t < s[m] ? t : m;
-      }
-      a[i * groups + t].update(kids.a[k], freq);
+      lv = s.reduce(function(p, c){
+        return p > c ? c : p;
+      });
+      idx = s.indexOf(lv);
+      a[i * groups + idx].update(kids.a[k], freq);
     }
   }
   return a;
