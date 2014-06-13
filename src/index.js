@@ -3,6 +3,7 @@
 var randomGender = function () {
   return Math.random() > 0.5 ? 'F' : 'M';
 };
+
 var demoList = function (n) {
   var array = [];
   for (var i = 0; i < n; i += 1) {
@@ -10,14 +11,23 @@ var demoList = function (n) {
   }
   return array;
 };
+
 var countGirls = function (array) {
   return array.reduce(function (p, c) {
     return c.gender === 'F' ? p + 1 : p;
   }, 0);
 };
+
 var ratio = function (girls, total) {
   return girls * 100 / total;
 };
+
+var isF = function (kid) {
+  if (kid.gender === 'F') {
+    return true;
+  }
+  return false;
+}
 
 function Kids (array) {
   this.a = [];
@@ -100,8 +110,10 @@ function Event (size) {
     this.boys = this.total - this.girls;
     this.ratio = ratio (this.girls, this.total);
   };
-  this.score = function (kid, week, freq) {
+  this.score = function (kid, week, gratio, freq) {
     var score = 0;
+    var nratio = 0;
+    var currDiffRatio, newDiffRatio;
     for (var i = 0; i < this.a.length; i += 1) {
       if (kid === this.a[i]) {
         return Number.MAX_VALUE;
@@ -110,6 +122,12 @@ function Event (size) {
     score += freq.getFreq (kid, this.a);
     if ((this.total + 1) > this.size) {
       score += (this.size - 1) * week;
+    }
+    nratio = ratio(isF(kid) ? this.girls + 1 : this.girls, this.total);
+    currDiffRatio = Math.abs(gratio - this.ratio);
+    newDiffRatio = Math.abs(gratio - nratio);
+    if (newDiffRatio > currDiffRatio) {
+      score += newDiffRatio * (this.total + 1) / 100;
     }
     return score;
   };
@@ -136,7 +154,7 @@ function Results (weeks, groupSize) {
     for (k = 0; k < kids.total; k += 1) {
       s = [];
       for (g = 0 + i * groups; g < (groups + i * groups); g += 1) {
-        score = a[g].score(kids.a[k], i + 1, freq);
+        score = a[g].score(kids.a[k], i + 1, kids.ratio, freq);
         if (score == Number.MAX_VALUE) {
           continue assignkid;
         } else {
@@ -150,5 +168,5 @@ function Results (weeks, groupSize) {
       a[i * groups + idx].update(kids.a[k], freq);
     }
   }
-  return a;
+  return {a:a, kids:kids, freq: freq};
 }
