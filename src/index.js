@@ -56,7 +56,8 @@ var scoreRatio = function (
   var newRatio = ratio(isF(kida) ? girls + 1 : girls, total + 1);
   var currentDiffRatio = Math.abs(globalRatio - currentRatio);
   var newDiffRatio = Math.abs(globalRatio - newRatio);
-  if (newDiffRatio > currentDiffRatio) {
+  if (newDiffRatio > currentDiffRatio ||
+      (newDiffRatio === currentDiffRatio === 0)) {
     return newDiffRatio * (total + 1) / 100;
   }
   return 0;
@@ -125,8 +126,8 @@ function Event (size) {
   this.size = size;
 
   this.update = function (kid, freq) {
-    this.a.push(kid);
     freq.update(kid, this.a);
+    this.a.push(kid);
     this.total = this.a.length;
     this.girls = countGirls(this.a);
     this.boys = this.total - this.girls;
