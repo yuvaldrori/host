@@ -45,7 +45,7 @@ var scoreFreq = function (kida, kids, freq) {
 
 var scoreSize = function (total, size, round) {
   if ((total + 1) > size) {
-    return (size - 1) * round;
+    return total * round + 1;
   }
   return 0;
 };
@@ -78,7 +78,7 @@ function Kids (array) {
     this.ratio = ratio(this.girls, this.total);
   };
 
-  this.update(array === undefined ? demoList(35) : array);
+  this.update(array === undefined ? demoList(38) : array);
 }
 
 function Freq (n) {
