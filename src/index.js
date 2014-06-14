@@ -47,6 +47,7 @@ var scoreSize = function (total, size, round) {
   if ((total + 1) > size) {
     return (size - 1) * round;
   }
+  return 0;
 };
 
 var scoreRatio = function (
@@ -58,6 +59,7 @@ var scoreRatio = function (
   if (newDiffRatio > currentDiffRatio) {
     return newDiffRatio * (total + 1) / 100;
   }
+  return 0;
 };
 
 function Kids (array) {
@@ -114,6 +116,7 @@ function Freq (n) {
 }
 
 function Event (size) {
+  var that = this;
   this.a = [];
   this.total = 0;
   this.girls = 0;
@@ -130,17 +133,17 @@ function Event (size) {
     this.ratio = ratio (this.girls, this.total);
   };
 
-  var exists = function (kida) {
-    if (this.a.filter(function (element) {
+  function has (kida) {
+    if (that.a.filter(function (element) {
       return kida === element;
     }).length > 0) {
       return true;
     }
     return false;
-  };
+  }
 
   this.score = function (kid, week, gratio, freq) {
-    if (exists(kid)) {
+    if (has(kid)) {
       return Number.MAX_VALUE;
     }
 
