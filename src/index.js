@@ -1,5 +1,15 @@
 'use strict';
 
+var arrayMinValue = function (array) {
+  return array.reduce(function(p, c){
+    return p > c ? c : p;
+  });
+};
+
+var arrayMinIndex= function (array) {
+  return array.indexOf(arrayMinValue(array));
+};
+
 var randomGender = function () {
   return Math.random() > 0.5 ? 'F' : 'M';
 };
@@ -29,6 +39,27 @@ var isF = function (kid) {
   return false;
 }
 
+var scoreFreq = function (kida, kids, freq) {
+  return freq.getFreq (kida, kids);
+};
+
+var scoreSize = function (total, size, round) {
+  if ((total + 1) > size) {
+    return (size - 1) * round;
+  }
+};
+
+var scoreRatio = function (
+    kida, girls, total,
+    globalRatio, currentRatio) {
+  var newRatio = ratio(isF(kida) ? girls + 1 : girls, total + 1);
+  var currentDiffRatio = Math.abs(globalRatio - currentRatio);
+  var newDiffRatio = Math.abs(globalRatio - newRatio);
+  if (newDiffRatio > currentDiffRatio) {
+    return newDiffRatio * (total + 1) / 100;
+  }
+};
+
 function Kids (array) {
   this.a = [];
   this.total = 0;
@@ -45,22 +76,12 @@ function Kids (array) {
   };
 
   this.update(array === undefined ? demoList(35) : array);
-
-  this.debug = function () {
-    return {
-      a: this.a,
-      total: this.total,
-      girsl: this.girls,
-      boys: this.boys,
-      ratio: this.ratio
-    };
-  };
 }
 
 function Freq (n) {
   this.a = [];
 
-  var init = function (n) {
+  this.init = function (n) {
     var a = [];
     for (var i = 0; i < n; i += 1) {
       a[i] = [];
@@ -71,7 +92,7 @@ function Freq (n) {
     return a;
   };
 
-  this.a = init(n);
+  this.a = this.init(n);
 
   this.update = function (kida, kids) {
     var a = [];
@@ -80,6 +101,7 @@ function Freq (n) {
       this.a[kida.id][kids[i].id] += 1;
     }
   };
+
   this.getFreq = function (kida, kids) {
     var score = 0;
     var a = [];
@@ -88,9 +110,6 @@ function Freq (n) {
       score += this.a[kida.id][a[i].id] + this.a[a[i].id][kida.id];
     }
     return score;
-  };
-  this.debug = function () {
-    return this.a;
   };
 }
 
@@ -110,25 +129,28 @@ function Event (size) {
     this.boys = this.total - this.girls;
     this.ratio = ratio (this.girls, this.total);
   };
+
+  var exists = function (kida) {
+    if (this.a.filter(function (element) {
+      return kida === element;
+    }).length > 0) {
+      return true;
+    }
+    return false;
+  };
+
   this.score = function (kid, week, gratio, freq) {
+    if (exists(kid)) {
+      return Number.MAX_VALUE;
+    }
+
     var score = 0;
-    var nratio = 0;
-    var currDiffRatio, newDiffRatio;
-    for (var i = 0; i < this.a.length; i += 1) {
-      if (kid === this.a[i]) {
-        return Number.MAX_VALUE;
-      }
-    }
-    score += freq.getFreq (kid, this.a);
-    if ((this.total + 1) > this.size) {
-      score += (this.size - 1) * week;
-    }
-    nratio = ratio(isF(kid) ? this.girls + 1 : this.girls, this.total);
-    currDiffRatio = Math.abs(gratio - this.ratio);
-    newDiffRatio = Math.abs(gratio - nratio);
-    if (newDiffRatio > currDiffRatio) {
-      score += newDiffRatio * (this.total + 1) / 100;
-    }
+
+    score += scoreFreq (kid, this.a, freq);
+    score += scoreSize (this.total, this.size, week);
+    score += scoreRatio (kid, this.girls, this.total,
+        gratio, this.ratio);
+
     return score;
   };
 }
@@ -141,7 +163,6 @@ function Results (weeks, groupSize) {
   var groups = Math.floor(kids.total / groupSize);
   var events = groups * weeks;
   var i, g, k;
-  var lv, idx;
   var score = 0;
   //init results with hosts
   for (i = 0; i < events; i += 1) {
@@ -161,11 +182,7 @@ function Results (weeks, groupSize) {
           s.push(score);
         }
       }
-      lv = s.reduce(function(p, c){
-        return p > c ? c : p;
-      });
-      idx = s.indexOf(lv);
-      a[i * groups + idx].update(kids.a[k], freq);
+      a[i * groups + arrayMinIndex(s)].update(kids.a[k], freq);
     }
   }
   return {a:a, kids:kids, freq: freq};
