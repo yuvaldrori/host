@@ -52,12 +52,16 @@ var scoreSize = function (total, size, round) {
 
 var scoreRatio = function (
     kida, girls, total,
-    globalRatio, currentRatio) {
+    globalRatio, currentRatio, two) {
   var newRatio = ratio(isF(kida) ? girls + 1 : girls, total + 1);
   var currentDiffRatio = Math.abs(globalRatio - currentRatio);
   var newDiffRatio = Math.abs(globalRatio - newRatio);
-  if (newDiffRatio > currentDiffRatio ||
-      (newDiffRatio === currentDiffRatio === 0)) {
+  if (// ratio not getting better
+      newDiffRatio > currentDiffRatio ||
+      // only one gender so far
+      (newDiffRatio === currentDiffRatio === 0) ||
+      // at least two of each
+      newRatio < two) {
     return newDiffRatio * (total + 1) / 100;
   }
   return 0;
@@ -143,7 +147,7 @@ function Event (size) {
     return false;
   }
 
-  this.score = function (kid, week, gratio, freq) {
+  this.score = function (kid, week, gratio, freq, two) {
     if (has(kid)) {
       return Number.MAX_VALUE;
     }
@@ -153,7 +157,7 @@ function Event (size) {
     score += scoreFreq (kid, this.a, freq);
     score += scoreSize (this.total, this.size, week);
     score += scoreRatio (kid, this.girls, this.total,
-        gratio, this.ratio);
+        gratio, this.ratio, two);
 
     return score;
   };
@@ -166,6 +170,7 @@ function Results (weeks, groupSize) {
   var freq = new Freq(kids.total);
   var groups = Math.floor(kids.total / groupSize);
   var events = groups * weeks;
+  var two = 2 * 100 / groupSize;
   var i, g, k;
   var score = 0;
   //init results with hosts
@@ -179,7 +184,7 @@ function Results (weeks, groupSize) {
     for (k = 0; k < kids.total; k += 1) {
       s = [];
       for (g = 0 + i * groups; g < (groups + i * groups); g += 1) {
-        score = a[g].score(kids.a[k], i + 1, kids.ratio, freq);
+        score = a[g].score(kids.a[k], i + 1, kids.ratio, freq, two);
         if (score == Number.MAX_VALUE) {
           continue assignkid;
         } else {
