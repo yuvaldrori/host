@@ -118,6 +118,14 @@ function Freq (n) {
     }
     return score;
   };
+
+  this.toCsvString = function () {
+    var csvString = '';
+    for (var i = 0; i < this.a.length; i += 1) {
+      csvString += this.a[i].join(',') + '\n';
+    }
+    return csvString;
+  };
 }
 
 function Event (size) {
@@ -157,7 +165,7 @@ function Event (size) {
     score += scoreFreq (kid, this.a, freq);
     score += scoreSize (this.total, this.size, week);
     score += scoreRatio (kid, this.girls, this.total,
-        gratio, this.ratio, two);
+                         gratio, this.ratio, two);
 
     return score;
   };
