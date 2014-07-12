@@ -34,7 +34,7 @@ function HOST () {
     return array.reduce(function(p, c){
       return p > c ? c : p;
     });
-  }
+  };
 
   function arrayMinIndex (array) {
     return array.indexOf(arrayMinValue(array));
@@ -50,12 +50,21 @@ function HOST () {
     return female * 100 / size;
   };
 
+  function twoRatio (groupSize) {
+    // the ratio of at least two from same gender
+    return 2 * 100 / groupSize;
+  };
+
   function isFemale (person) {
     if (person.gender === 'F') {
       return true;
     }
     return false;
-  }
+  };
+
+  function groupsInShifts (people, groupSize) {
+    return Math.floor(people.length / groupSize);
+  };
 
   // test functions
   function randomGender () {
@@ -89,9 +98,6 @@ function HOST () {
   };
 
   function scoreRatio (person, group, people, groupSize) {
-    // the ratio of at least two from same gender
-    var twoRatio = 2 * 100 / groupSize;
-
     var female = countFemale(gorup);
     var currentFMratio = FMratio(female, group.length);
 
@@ -109,10 +115,13 @@ function HOST () {
         // only one gender so far
         (newFMDiffRatio === currentFMDiffRatio === 0) ||
         // at least two of each
-        newFMRatio < twoRatio) {
+        newFMRatio < twoRatio(groupSize)) {
       return newFMDiffRatio * (group.size + 1) / 100;
     }
     return 0;
+  };
+
+  function resultsFromPeople (people, shifts) {
   };
 
 }
